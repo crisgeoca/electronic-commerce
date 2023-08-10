@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(path = "/prices")
 @Slf4j
@@ -21,7 +19,7 @@ public class PricesController {
     private final PricesTemplate pricesTemplate;
 
     @GetMapping("/find-by-query")
-    public List<PricesDto> getPricesByQuery(@RequestBody PricesRequestDto pricesRequestDto) {
+    public PricesDto getPricesByQuery(@RequestBody PricesRequestDto pricesRequestDto) {
         return pricesTemplate.findRateByProduct(pricesRequestDto.getStartDate(), pricesRequestDto.getProductId(), pricesRequestDto.getBrandId());
     }
 

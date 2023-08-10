@@ -1,5 +1,6 @@
 package es.inditex.commerce.controller;
 
+import es.inditex.commerce.exception.NotRecordFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -8,7 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,8 +41,7 @@ public class PricesControllerTest {
                         .content(payload))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$.price", equalTo(38.95)));
     }
 
     @Test
@@ -58,8 +60,7 @@ public class PricesControllerTest {
                         .content(payload))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.price", equalTo(38.95)));
     }
 
     @Test
@@ -78,8 +79,7 @@ public class PricesControllerTest {
                         .content(payload))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.price", equalTo(38.95)));
     }
 
     @Test
@@ -98,8 +98,7 @@ public class PricesControllerTest {
                         .content(payload))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.price", equalTo(38.95)));
     }
 
     @Test
@@ -117,9 +116,9 @@ public class PricesControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotRecordFoundException))
+                .andExpect(result -> assertEquals("Not records found", result.getResolvedException().getMessage()));
     }
 
 }

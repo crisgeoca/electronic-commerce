@@ -1,7 +1,9 @@
 package es.inditex.commerce.enterprise;
 
 import es.inditex.commerce.bussines.PricesTemplate;
+import es.inditex.commerce.dbo.Prices;
 import es.inditex.commerce.dto.PricesDto;
+import es.inditex.commerce.exception.NotRecordFoundException;
 import es.inditex.commerce.mapper.PricesMapper;
 import es.inditex.commerce.repository.PricesRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Comparator;
 
 @Service
 @Slf4j
@@ -18,15 +19,18 @@ import java.util.stream.Collectors;
 public class PricesService implements PricesTemplate {
 
     private static final PricesMapper MAPPER = PricesMapper.INSTANCE;
+    public static final String NOT_RECORDS_FOUND = "Not records found";
 
     private final PricesRepository pricesRepository;
 
     @Override
-    public List<PricesDto> findRateByProduct(LocalDateTime startDate, Integer productId, Integer brandId) {
+    public PricesDto findRateByProduct(LocalDateTime startDate, Integer productId, Integer brandId) {
         return pricesRepository.findByStartDateGreaterThanEqualAndProductIdAndBrandId(startDate, productId, brandId)
                 .stream()
+                .max(Comparator.comparing(Prices::getPriority) //Some cases will have equal disambiguating priority value
+                        .thenComparing(Prices::getPrice))//For those cases will also filter by highest price
                 .map(MAPPER::toPricesDto)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new NotRecordFoundException(NOT_RECORDS_FOUND));
     }
 
 }
